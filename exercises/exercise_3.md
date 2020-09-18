@@ -696,7 +696,7 @@ def plot_image(plt, data, label, size, location):
     img = np.reshape(data, size)
     label = np.argmax(label)
     plt.imshow(img)
-    plt.title("(Label: " + str(LABELS[label]) + ")")
+    plt.title("(Label: " + label + ")")
 ```
 
 Una vez que hemos generado la función para visualizar la estructura de las imágenes generadas podemos utilizarla para mostrar algunos de nuestros ejemplos mediante el siguiente fragmento de código:
