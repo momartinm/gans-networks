@@ -341,6 +341,63 @@ El noveno método o función se corresponde con la función dque generá los pun
   def create_checkpoint(self):
     self.__checkpoint.save(file_prefix = self.__checkpoint_prefix)
 ```
+```
+class Model:
+  
+  def __init__(self, height, width, dims):
+    
+    self.__generator = build_generator_model('generator_test', height, width, dims)
+    self.__discriminator = build_discriminator_model('discriminator_test', height, width, dims)
+    self.__cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+
+    self.__generator_optimizer = optimizers.Adam(1e-4)
+    self.__discriminator_optimizer = optimizers.Adam(1e-4)
+
+    self.__checkpoint_dir = './training_checkpoints'
+    self.__checkpoint_prefix = os.path.join(self.__checkpoint_dir, "ckpt")
+
+    self.__checkpoint = tf.train.Checkpoint(generator_optimizer=self.__generator_optimizer,
+                                 discriminator_optimizer=self.__discriminator_optimizer,
+                                 generator=self.__generator,
+                                 discriminator=self.__discriminator)
+    
+    self.__checkpoint.restore(tf.train.latest_checkpoint(self.__checkpoint_dir))
+
+  def generator_summary(self):
+    return self.__generator.summary()
+
+  def discriminator_summary(self):
+    return self.__discriminator.summary()
+
+  @property
+  def generator(self):
+    return self.__generator  
+
+  @property
+  def discriminator(self):
+    return self.__discriminator  
+
+  @property
+  def generator_optimizer(self):
+    return self.__generator_optimizer
+
+  @property
+  def discriminator_optimizer(self):
+    return self.__discriminator_optimizer 
+
+  @tf.autograph.experimental.do_not_convert
+  def discriminator_loss(self, real_output, fake_output):
+    real_loss = self.__cross_entropy(tf.ones_like(real_output), real_output)
+    fake_loss = self.__cross_entropy(tf.zeros_like(fake_output), fake_output)
+    return real_loss + fake_loss       
+
+  @tf.autograph.experimental.do_not_convert
+  def generator_loss(self, fake_output):
+    return self.__cross_entropy(tf.ones_like(fake_output), fake_output)     
+
+  def create_checkpoint(self):
+    self.__checkpoint.save(file_prefix = self.__checkpoint_prefix)    
+```
 
 **Paso 9 - Definición de la función de generación de ejemplos y entrenamiento**
 
@@ -409,6 +466,32 @@ Aplicaremos el algoritmo de optimización sobre los nuevos valores calculados.
       model.discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, model.discriminator.trainable_variables))
 ```
 
+```
+@tf.function
+def train_step(model, writer, images, example_num, example_shape, epoch):
+  
+  examples = tf.random.normal([example_num, example_shape])
+
+  with writer.as_default():
+    with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
+      
+      generated_images = model.generator(examples, training=True)
+      real_output = model.discriminator(images, training=True)
+      fake_output = model.discriminator(generated_images, training=True)
+
+      gen_loss = model.generator_loss(fake_output)
+      disc_loss = model.discriminator_loss(real_output, fake_output)
+
+    tf.summary.scalar("generator loss", gen_loss, step=epoch+1)
+    tf.summary.scalar("discriminator loss", disc_loss, step=epoch+1)   
+    
+    gradients_of_generator = gen_tape.gradient(gen_loss, model.generator.trainable_variables)
+    gradients_of_discriminator = disc_tape.gradient(disc_loss, model.discriminator.trainable_variables)
+
+    model.generator_optimizer.apply_gradients(zip(gradients_of_generator, model.generator.trainable_variables))
+    model.discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, model.discriminator.trainable_variables))
+```
+
 **Paso 10 - Visualización y test del proceso de entrenamiento**
 
 Para poder comprobar como evoluciona nuestra red vamos a crear una función de test que nos permitirá analizar la evolución de nuestra red en cada iteración. Para ello crearemos una función denominada __generate_and_test_images__ de tipo tf.function (). Esta función recibirá 5 parámetros de entrada:
@@ -447,6 +530,28 @@ Almacenaremos los valores de loss en el writer.
 ```
 Finalmente generaremos una imagen con todos los ejemplos generados. 
 ```    
+    fig = plt.figure(figsize=(3,3))
+
+    for i in range(predictions.shape[0]):
+        plt.subplot(3, 3, i+1)
+        plt.imshow(predictions[i, :, :, 0] * 2048 + 2048, cmap='gray')
+        plt.axis('off')
+
+    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
+    plt.show()
+```
+```
+def generate_and_test_images(model, writer, epoch, num_examples, example_size):
+
+  examples = tf.random.normal([num_examples, example_size])
+
+  with writer.as_default():
+    
+    predictions = model.generator(examples, training=False)
+    test_loss = model.generator_loss(predictions)
+
+    tf.summary.scalar("test loss", test_loss, step=epoch+1)
+
     fig = plt.figure(figsize=(3,3))
 
     for i in range(predictions.shape[0]):
