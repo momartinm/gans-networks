@@ -14,7 +14,7 @@ En este taller se describe el proceso de construcción de redes generativas anta
 * Ejercicio 1 - Jupyter Notebook sobre Docker 
     - Ejercicio 1.1 - [Instalación de Docker](./exercises/exercise_1_1.md)
     - Ejercicio 1.2 - [Desplegando mi servidor Jupyter](./exercises/exercise_1_2.md)
-* Ejercicio 2 - [Jupyter Notebook sobre Collaborate](./exercises/exercise_2.md)
+* Ejercicio 2 - [Notebook sobre Collaborate](./exercises/exercise_2.md)
 * Ejercicio 3 - [Construcción de una red de neuronas para la generación de números manuscritos](./exercises/exercise_3.md)
 * Ejercicio 4 - [Construcción de una red de neuronas para la manipulación de rostros](./exercises/exercise_4.md)
 
