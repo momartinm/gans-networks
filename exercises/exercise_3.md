@@ -165,7 +165,7 @@ Para la definición del proceso de creación de la red de neuronas de generació
 def build_generator_model(name, height, width, dims=1):
     
     model = Sequential()
-    model.add(Dense(7*7*256, use_bias=False, input_shape=(height*width, dims)))
+    model.add(Dense(7*7*256, use_bias=False, input_shape=(height*width, )))
     model.add(BatchNormalization())
     model.add(LeakyReLU())
 
