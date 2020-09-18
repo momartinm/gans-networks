@@ -409,20 +409,6 @@ Aplicaremos el algoritmo de optimización sobre los nuevos valores calculados.
       model.discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, model.discriminator.trainable_variables))
 ```
 
-Además crearemos una función denominada ____call____ que nos permitirá calcular el valor de y para cada una de las x en base a los valores calculados. 
-
-```
-    def __call__(self, x):
-      return tf.linalg.matmul(x, self.weights) + self.bias
-```
-
-y una función denominada add que nos permitirá añadir una nuevo valor a las diferentes métricas almacenadas en vars indicando el nombre de la métrica y el valor. 
-
-```
-    def add(self, variable, value):
-      self.vars[variable].append(value)
-```
-
 **Paso 10 - Visualización y test del proceso de entrenamiento**
 
 Para poder comprobar como evoluciona nuestra red vamos a crear una función de test que nos permitirá analizar la evolución de nuestra red en cada iteración. Para ello crearemos una función denominada __generate_and_test_images__ de tipo tf.function (). Esta función recibirá 5 parámetros de entrada:
