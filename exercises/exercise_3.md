@@ -346,7 +346,7 @@ Una vez que hemos definido nuestro modelo tenemos que crear las diferentes funci
 
 * model (Model) se corresponde con el modelo que está siendo entrenado.
 * writer (TF Writer) se corresponde con el objeto utilizado para almacena la información para evaluación el proceso de entrenamiento. 
-* images () se corresponde con las imágenes reales utilizadas para entrenar a la red discriminadora. 
+* images (Tensor Slices) se corresponde con las imágenes reales utilizadas para entrenar a la red discriminadora. 
 * num_examples (int) se corresponde con el numero de imagenes que serán generado en pasa iteración de entrenamiento. 
 * example_shape (tupple(int, int)) se corresponde con la estructura de la imagenes. 
 * epoch (int) se corresponde con la iteración actual del proceso de entrenamiento. 
@@ -355,23 +355,53 @@ Una vez que hemos definido nuestro modelo tenemos que crear las diferentes funci
 @tf.function
 def train_step(model, writer, images, example_num, example_shape, epoch):
     
+```
+Definiremos un conjunto de ejemplos de tipo aleatorio
+
+```
     examples = tf.random.normal([example_num, example_shape])
     
+```
+Ejecutaremos el proceso bajo el objeto writer con el objetivo de almacenar la información de la función de loss de las dos redes de neuronas. 
+```
     with writer.as_default():
+    
+```
+A su vez ejecutaremos el proceso bajo el objeto de tipo GradientTape con el objetivo de aplicar el algoritmo de optimización definido previamente en la clase Model. 
+```
       with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
 
+```
+Generaremos un conjunto de imagenes de tipo aleatorio y calcularemos los valores definidos por la red para la imágenes realizar y las falsas (generadas).
+```
         generated_images = model.generator(examples, training=True)
         real_output = model.discriminator(images, training=True)
         fake_output = model.discriminator(generated_images, training=True)
-        
+
+```
+A continuación calcularemos el valor de pérdida (loss) para cada una de las redes. 
+```
+
         gen_loss = model.generator_loss(fake_output)
         disc_loss = model.discriminator_loss(real_output, fake_output)
+
+```
+Finalmente almacenaremos los valores de los en el writer para cada una de las redes de neuronas.  
+```
 
       tf.summary.scalar("generator loss", gen_loss, step=epoch+1)
       tf.summary.scalar("discriminator loss", disc_loss, step=epoch+1)
 
+```
+Calcularemos los gradientes en base a los valores de loss obtenidos para cada red. 
+```
+
       gradients_of_generator = gen_tape.gradient(gen_loss, model.generator.trainable_variables)
       gradients_of_discriminator = disc_tape.gradient(disc_loss, model.discriminator.trainable_variables)
+
+```
+Aplicaremos el algoritmo de optimización sobre los nuevos valores calculados. 
+```
 
       model.generator_optimizer.apply_gradients(zip(gradients_of_generator, model.generator.trainable_variables))
       model.discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, model.discriminator.trainable_variables))
@@ -391,85 +421,147 @@ y una función denominada add que nos permitirá añadir una nuevo valor a las d
       self.vars[variable].append(value)
 ```
 
-A continuación tenemos que cargar los datos en las estructuras de datos básicas para comenzar a trabajar con ellos. Por lo que necesitaremos dos conjuntos de datos:
 
-* Ejemplos (entrenamiento/validacion/test): Conjunto de ejemplos de información (imágenes) para los procesos de entrenamiento, validación y test.
-* Labels (clases): Conjunto de clases asignadas a cada una de las imágenes de los diferentes conjuntos. Cada conjunto tendrá un conjunto de labels del mismo tamaño. 
+**Paso 9 - Visualización y test del proceso de entrenamiento**
 
-Para poder cargar los datos en formato minist tenemos que utilizar las funcionalidades de importación propuesta por el equipo de TensorFlow (version 2016). Para ello debemos cargar el código de las funciones de cargar mediante la inclusión de un archivo local que denominaremos __input_data.py__. El código fuente de este archivo, se puede descargar en la siguiente [url](./resources/exercise_4/input_data.py). Una vez incluido este archivo podemos realizar la carga de datos. Para ellos utilizaremos la función __read_data_sets__ que nos permite cargar dataset desde una url, utilizando las siguiente opciones:
+Para poder comprobar como evoluciona nuestra red vamos a crear una función de test que nos permitirá analizar la evolución de nuestra red en cada iteración. Para ello crearemos una función denominada __generate_and_test_images__ de tipo tf.function (). Esta función recibirá 5 parámetros de entrada:
 
-- Nombre del dataset
-- source_url: Se corresponde con la url donde estará almacenada la información. 
-- one_hot:  Realiza una transformación sobre las variables categorizadas a una codificación binaria. Es decir si tenemos n valores para una variables categorica se crearan n features binarias (0,1) de forma que sólo una de ellas tendrá el valor 1 correspondiendose con uno de los valores de la variable categorica. En este ejercicio, se utiliza para convertar la caraterística label (Clase de salida) en una coficiación binaria. 
-
-```
-full_data = input_data.read_data_sets('data', one_hot=True)
-
-# Condificación one hot para un ejemplo de tipo Dress
-# 3 => [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
-# El valor tres se convierte en una array de probabilidades donde la posición que se corresponde con la etiqueta (3) tiene una probabilidad de 1 y el resto tienen una probabilidad de cero.
-
-
-LABELS = {
- 0: 'Camiseta/top',
- 1: 'Pantalones',
- 2: 'Sudadera',
- 3: 'Vestido',
- 4: 'Abrigo/Gabardina',
- 5: 'Sandalias/Zapato',
- 6: 'Camisa',
- 7: 'Zapatillas',
- 8: 'Bolso/Bolsa',
- 9: 'Botas',
-}
-```
-
-**Paso 5: Análisis de datos**
-
-Una vez que hemos cargado los datos, tenemos que analizar los datos para entender su estructura, formato, si tenemos disponibles los suficientes conjuntos de entrenamiento, etc. Para ellos vamos a analizar algunas caracteristicas de los datos. Primero comprobaremos el tamaño (shape) de los conjuntos de datos que vamos a utilizar:
+* model (Model) se corresponde con el modelo que está siendo entrenado.
+* writer (TF Writer) se corresponde con el objeto utilizado para almacena la información para evaluación el proceso de entrenamiento. 
+* epoch (int) se corresponde con la iteración actual del proceso de entrenamiento. 
+* num_examples (int) se corresponde con el numero de imagenes que serán generado en pasa iteración de entrenamiento. 
+* example_shape (tupple(int, int)) se corresponde con la estructura de la imagenes. 
 
 ```
-print("Conjunto de entrenamiento (Imágenes) shape: {shape}".format(shape=full_data.train.images.shape))
-print("Conjunto de entrenamiento (Classes) shape: {shape}".format(shape=full_data.train.labels.shape))
-print("Conjunto de test (Imágenes) shape: {shape}".format(shape=full_data.test.images.shape))
-print("Conjunto de test (Clases) shape: {shape}".format(shape=full_data.test.labels.shape))
-```
-
-Cómo podemos observar tenemos 55000 ejemplos (imágenes) de entrenamiento donde cada uno de ellas está formada por un array de 784 pixeles y pueden pertener a 10 clases diferentes. 
-
-Lo primero a analizar, es comocer si el número de clases y la estructura de los ejemplos es similar tanto en el conjunto de test como entrenamiento. En este caso ambos conjuntos están bien formados, tenemos un conjunto global formado por 65000 ejemplos donde un 18% se corresponde con el conjunto de test y todas la imágenes tienen el mismo tamaño (784 pixeles). 
-
-Lo segundo a comprobar es el formato de la imagen, tenemos que definir cual es la estructura de la imagen. Para comprobarlo, bastaría con calcular la raíz cuadrada de 784 que se corresponde con 28. Esto significa que las imágenes tiene un tamaño de 28x28 pixeles. __Es obligatorio que todas las imágenes tenga el mismo tamaño, sino no podremos construir nuestra red de neuronas__. 
+def generate_and_test_images(model, writer, epoch, num_examples, example_size):
 
 ```
-print(full_data.train.images[0].shape)
-print(math.sqrt(full_data.train.images[0].shape[0]))
-image_size = int(math.sqrt(full_data.train.images[0].shape[0]))
-print(image_size)
-
-print(full_data.train.labels[0])
-```
-
-Lo tercero es comprobar el volumen de ejemplos de cada clase en el conjunto de entrenamiento y en el conjunto de test. Normalmente nosotros tendremos que crear estos conjuntos, por lo que es muy útil comprobar si los conjuntos están balanceados, con el objetivo de balancearlos en caso de que no ocurra. 
+Definiremos un conjunto de ejemplos de tipo aleatorio para testear nuestra RGA.
 
 ```
-train_labels = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
-test_labels = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  examples = tf.random.normal([num_examples, example_size])
 
-for label in full_data.train.labels:
-    train_labels = np.add(train_labels, label)
-    
-print(train_labels)
+```
+Ejecutaremos el proceso bajo el objeto writer con el objetivo de almacenar la información obtenida sobre el conjunto de test aleatorio.
+```
+  with writer.as_default():
+  
+```
+Prediciremos el valor del conjunto de imagenes aleatorio generadas previamente y calcularemo el valor de los para cada una de ellas.
+``` 
+    predictions = model.generator(examples, training=False)
+    test_loss = model.generator_loss(predictions)
 
-for label in full_data.test.labels:
-    test_labels = np.add(test_labels, label)
+```
+Almacenaremos los valores de loss en el writer. 
+```
+    tf.summary.scalar("test loss", test_loss, step=epoch+1)
+     
+```
+Finalmente generaremos una imagen con todos los ejemplos generados. 
+```    
+    fig = plt.figure(figsize=(3,3))
 
-print(test_labels)
+    for i in range(predictions.shape[0]):
+        plt.subplot(3, 3, i+1)
+        plt.imshow(predictions[i, :, :, 0] * 2048 + 2048, cmap='gray')
+        plt.axis('off')
+
+    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
+    plt.show()
 ```
 
-**Paso 6: Visualización de los datos**
+**Paso 10 - Definición de bucle de entrenamiento (Función)**
 
-Por último vamos a crear una función para visualizar las imágenes con las que estamos trabajando con el objetivo de ver el tipo de imágenes que estamos utilizando. La función se denominará __plot_image__ y nos permitirá visualizar imágenes con su etiqueta y utilizará 5 parámetros de entrada:
+Una vez que se han definido todas las variables y funciones necesarias para el proceso de aprendizaje, podemos construir el bucle en tensorflow. Esta función estará formada por 5 paramétros:
+
+* dataset (TensorFlow Slice) se corresponde con el conjunto de ejemplo de entrenamiento. 
+* epoch (int) se corresponde con el número de iteraciones del proceso de entrenamiento. 
+* example_num
+* weight (int) se corresponde con el ancho de la imagenes que se utilizarán en el proceso. 
+* height (int) se corresponde con el ancho de la imagenes que se utilizarán en el proceso. 
+* log_dir (str) se corresponde con la ruta donde se almacenarán los ficheros de log
+
+
+```
+def train(dataset, epochs, example_num, weight, height, log_dir):
+
+  model = Model(weight, height, 1)
+
+  writer = tf.summary.create_file_writer(log_dir)
+  
+  example_size = weight*height
+
+```
+Ejecutamos el bucle de entrenamiento en base al número de iteraciones. 
+```
+  for epoch in range(epochs):
+    start = time.time()
+
+```
+Para cada conjunto de imágenes presentes en el dataset realizamos el proceso de entrenamiento.  
+```
+    for image_batch in dataset:
+      train_step(model, writer, image_batch, example_num, example_size, epoch)
+
+    display.clear_output(wait=True)
+
+```
+Para cada iteración aplicamos un proceso de test. 
+```
+    generate_and_test_images(model, writer, epoch + 1, 9, example_size)
+
+```
+Cada 15 iteraciones almacenamos el estado del modelo con el objetivo de recuperarlo en caso de que existe algún problema durante la ejecución o en caso de que iniciomes un nuevo proceso de entrenamiento. 
+```
+    if (epoch + 1) % 15 == 0:
+      model.create_checkpoint()
+
+    print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
+
+  display.clear_output(wait=True)
+
+  return model
+
+```
+
+**Paso 11 - Ejecución del proceso de entrenamiento**
+
+Una vez construidas todas las clases y funciones podemos ejecutar nuestro proceso de aprendizaje de la siguiente manera:
+
+1. Definición del directorio donde se almacenaran los logs del proceso de entrenamiento. 
+2. Descarga y generación del conjunto de entrenamiento
+3. Generación del dataset de damos mediante slices indicando el trabajo de cada conjunto de datos. 
+4. Entrenamiento del modelo indicando el número de iteraciones que en el ejemplo es de 25. 
+
+```
+log_dir = "./logs/eager/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+train_data, train_labels = generate_data_set(HEIGHT, WIDTH, 2048)
+train_dataset = tf.data.Dataset.from_tensor_slices(train_data).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+
+model = train(train_dataset, 25, BATCH_SIZE, HEIGHT, WIDTH, log_dir)
+```
+
+El proceso de ejecución monstrará en cada iteración el conjunto de imágenes transformadas en el proceso de test para comprobar como va evolucionando nuestra RGA. 
+
+<img src="../img/secuencia_aprendizaje.png" alt="Secuencia de aprendizaje" width="800"/>
+
+
+**Paso 12 - Visualización de los resultados**
+
+Una vez finalizado el proceso de entrenamiento podremos visualizar el proceso mediante tensorboard utilizando el siguiente comando:
+
+```
+%tensorboard --logdir logs
+```
+
+<img src="../img/tensorboard_gans.png" alt="Resultado del proceso de aprendizaje de la red Gan" width="800"/>
+
+
+**Paso 13: Puesta en funcionamiento de la RGA**
+
+Por último vamos a crear una función para visualizar como realiza el proceso de generación nuestra RGA que denominaremos __plot_image__ y utilizará 5 parámetros:
 
 - plt: Es la figura sobre la que se insertará la imagen. 
 - data: Se corresponde con la imagen que queremos visualizar. 
@@ -486,33 +578,45 @@ def plot_image(plt, data, label, size, location):
     plt.title("(Label: " + str(LABELS[label]) + ")")
 ```
 
-Una vez que hemos generado la función para visualizar la estructura de los ejemplos y las etiquetas (labels) podemos utilizarla para mostrar algunos de nuestros ejemplos mediante el siguiente fragmento de código:
+Una vez que hemos generado la función para visualizar la estructura de las imágenes generadas podemos utilizarla para mostrar algunos de nuestros ejemplos mediante el siguiente fragmento de código:
 
 ```
+example = tf.random.normal([1, 28*28])
+prediction = model.generator(example, training=False)
+
 plt.figure(figsize=[18,18])
 
 plot_image(plt, 
-           full_data.train.images[4], 
-           full_data.train.labels[4,:], 
-           (image_size, image_size),
+           example,
+           'original',
+           (28, 28),
            121)
 
 plot_image(plt, 
-           full_data.test.images[95], 
-           full_data.test.labels[95,:], 
-           (image_size, image_size),
+           prediction[0, :, :, 0],
+           'generada',
+           (28, 28),           
            122)
 ```
+
+La ejecución de este fragmento de código mostrará la imagen aleatoria que utilizaremos para generar la nueva imagen y la que será generada por nuestra RGA. 
+
+<img src="../img/generacion.png" alt="Imágenes generadas por la RGA" width="800"/>
 
 **Congratulations Ninja!**
 
 Has aprendido como preparar los datos para el proceso de aprendizaje, como definir las clases del modelo y como distribuir los conjunto de entrenamiento y test. Has conseguido aprender:
 
 1. Como instalar paquetes en un notebook. 
-2. Como descargar archivo mediante python request.
-3. Como definir las clases o etiquetas (label) para la construcción de un modelo de aprendizaje. 
-4. Como realizar un análisis básico sobre los datos de entrenamamiento y test.
-5. Como visualizar imágenes mediante matplotlib. 
+2. Como desplegar TensorBoard en un entorno Notebook.
+3. Como definir los conjuntos de entrenamiento y test.
+4. Como crear una red generadora de tipo convolucional.  
+5. Como crear una red discriminadora de tipo convolucacional.
+6. Como definir el algortimo de optimización. 
+7. Como crear una clase para la definición del modelo conjunto.
+8. Como construir el bucle de entrenamiento reutilizable modificando algunos de los hiperámetros
+9. Como insertar información del proceso de entrenamiento en TensorBoard. 
+10. Como visualizar datos referentes al proceso de entrenamiento mediante TensorBoard. 
 
 <img src="../img/ejercicio_3_congrats.png" alt="Congrats ejercicio 3" width="800"/>
 
