@@ -694,9 +694,8 @@ Por último vamos a crear una función para visualizar como realiza el proceso d
 def plot_image(plt, data, label, size, location):
     plt.subplot(location)
     img = np.reshape(data, size)
-    label = np.argmax(label)
     plt.imshow(img)
-    plt.title("(Label: " + label + ")")
+    plt.title("(Label: " + str(label) + ")")
 ```
 
 Una vez que hemos generado la función para visualizar la estructura de las imágenes generadas podemos utilizarla para mostrar algunos de nuestros ejemplos mediante el siguiente fragmento de código:
