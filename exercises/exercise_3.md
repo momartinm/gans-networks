@@ -11,6 +11,8 @@ El objetivo de este ejercicio es construir una Red Generativa Antagónica (RGA) 
 * Model: Es una clase que contendrá todos los elementos de la RGA a construir. En este caso nuestro modelo estará a su vez formado por dos modelos de red de neuronas de tipo convolucional, ya que nuestro objetivo es generar imágenes que representan a caracteres numéricos. 
 * Train: Es un proceso de utilizará el modelo para entrenar los diferentes componentes que se encuentran definidos en el modelo. 
 
+Para la realización del ejercicio se recomienda utilizar el esquelo para Google Collab del siguiente [link](./resources/exercise_3/workshop_exercise_3.ipynb).
+
 **Paso 1 - Instalando paquetes en Notebooks**
 
 Los notebooks son entidades independientes que permiten la utilización de cualquier tipo de páquete python y para ellos nos ofrece la posibilidad de instalar paquete mediante la utilización de la sistema de instalación de paquetes pip. En el caso de que estés utilizando un Jupyter Notebook es necesario realizar la instalación de ciertos paquetes mediante los siguiente comandos:
