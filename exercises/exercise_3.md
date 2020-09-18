@@ -617,6 +617,35 @@ Cada 15 iteraciones almacenamos el estado del modelo con el objetivo de recupera
 
 ```
 
+```
+def train(dataset, epochs, example_num, weight, height, log_dir):
+
+  model = Model(weight, height, 1)
+
+  writer = tf.summary.create_file_writer(log_dir)
+
+  example_size = weight*height
+
+  for epoch in range(epochs):
+    start = time.time()
+
+    for image_batch in dataset:
+      train_step(model, writer, image_batch, example_num, example_size, epoch)
+
+    display.clear_output(wait=True)
+
+    generate_and_test_images(model, writer, epoch + 1, 9, example_size)
+
+    if (epoch + 1) % 15 == 0:
+      model.create_checkpoint()
+
+    print ('Time for epoch {} is {} sec'.format(epoch + 1, time.time()-start))
+
+  display.clear_output(wait=True)
+
+  return model
+```  
+
 **Paso 12 - Ejecución del proceso de entrenamiento**
 
 Una vez construidas todas las clases y funciones podemos ejecutar nuestro proceso de aprendizaje de la siguiente manera:
