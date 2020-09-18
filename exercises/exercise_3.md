@@ -11,7 +11,7 @@ El objetivo de este ejercicio es construir una Red Generativa Antagónica (RGA) 
 * Model: Es una clase que contendrá todos los elementos de la RGA a construir. En este caso nuestro modelo estará a su vez formado por dos modelos de red de neuronas de tipo convolucional, ya que nuestro objetivo es generar imágenes que representan a caracteres numéricos. 
 * Train: Es un proceso de utilizará el modelo para entrenar los diferentes componentes que se encuentran definidos en el modelo. 
 
-**Paso 1: Instalando paquetes en Notebooks**
+**Paso 1 - Instalando paquetes en Notebooks**
 
 Los notebooks son entidades independientes que permiten la utilización de cualquier tipo de páquete python y para ellos nos ofrece la posibilidad de instalar paquete mediante la utilización de la sistema de instalación de paquetes pip. En el caso de que estés utilizando un Jupyter Notebook es necesario realizar la instalación de ciertos paquetes mediante los siguiente comandos:
 
@@ -72,14 +72,14 @@ Requirement already satisfied: zipp>=0.5 in /usr/local/lib/python3.6/dist-packag
 
 En este caso no se ha realizado la instalación de ningún paquete debido a que todos los paquetes necesarios ya estaban instalados en el servidor Jupyter. 
 
-**Paso 2: Iniciando TensorBoard**
+**Paso 2 - Iniciando TensorBoard**
 
 A continuación vamos a incluir un comando que permite cargar la extensión de TensorFlow Board dentro de los cuadernos de tipo Jupyter, de forma que se despligue de manera embebida en el entorno.
 
 ```
 %load_ext tensorboard
 ```
-**Paso 2: Importando Paquetes**
+**Paso 3 - Importando Paquetes**
 
 Una vez que se ha realizado la instalación de los diferentes paquetes python, es necesario importar aquellas clases y métodos necesarios para la realización del ejercicio.
 
@@ -114,7 +114,7 @@ Para el desarrollo de los diferentes ejercicios vamos a necesitar un conjunto de
 * Keras.layers: Nos permite utilizar diferentes tipo de capas para incluir en una red de neuronas.
 * optimizers from keras: Nos permite utilizar diferentes tipos de algoritmos de optimización, en nuestro caso utilizaremos el optimizador de Adams.
 
-**Paso 4: Definición de variable globales**
+**Paso 4 - Definición de variable globales**
 
 Para la construcción de nuestra red RGA es necesario definir una serie de variables globales que utilizaremos a lo largo del notebook con el objetivo de simplificar los cambios que queramos realizar en el proceso de construcción de las redes. Las variables globales a definir son las siguientes:
 
@@ -125,7 +125,7 @@ WIDTH = 28
 HEIGHT = 28
 ```
 
-**Paso 5 Carga de los datos**
+**Paso 5 - Carga de los datos**
 
 Una vez que hayamos definido todos los elementos básicos necesarios para el taller vamos ha descargar nuestro datos. En este caso vamos a utilizar los datos de ejemplo almacenados en keras para la identificación de número manuscritos. Para ellos deberemos crear la siguiente función 
 
@@ -182,7 +182,7 @@ def build_generator_model(name, height, width, dims=1):
     return model
 ```
 
-**Paso 7: Creación del modelo generador (Generator)**
+**Paso 7: Creación del modelo discriminador (Discriminator)**
 
 A continuación podemos comenzar a crear le primera de las redes de neuronas necesarias para nuestro sistema. Esta red se corresponde con el generador que será la red que nos proveerá de ejemplos generados a partir de información aleatorios con el objetivo de conseguir generar ejemplos que se adapten a nuestras necesidades. Es decir, esta red es la que deber imitar el proceso de escritura manuscrita. La red está formada por las diferentes capas que se presentan en la imagen:
 
@@ -225,7 +225,7 @@ def build_discriminator_model(name, height, width, dims):
 
 Como se puede observar esta red de neuronas es una red de neurona de tipo convolucional clásica para la identificación de la clase. Esta red será la que se utilizará para predecir si los ejemplos (imágenes) generados por nuestra red generadora con correcto o no enviado su feedback a esta red con el objetivo de mejorar el proceso de aprendizaje. 
 
-**Paso 7: Definición de la clase Model**
+**Paso 8 - Definición de la clase Model**
 
 Para simplificar la creación de nuestro modelo, vamos a construir una clase para su manipulación. Para ello crearemos una clase en python denominada Model que tendrá ocho atributos:
 
@@ -340,7 +340,7 @@ El noveno método o función se corresponde con la función dque generá los pun
     self.__checkpoint.save(file_prefix = self.__checkpoint_prefix)
 ```
 
-**Paso 8 - Definición de la función de generación de ejemplos**
+**Paso 9 - Definición de la función de generación de ejemplos y entrenamiento**
 
 Una vez que hemos definido nuestro modelo tenemos que crear las diferentes funciones del proceso de entrenamiento. Para ello crearemos una función denominada __train_step__ de tipo tf.function (). Esta función recibirá 6 parámetros de entrada:
 
@@ -421,8 +421,7 @@ y una función denominada add que nos permitirá añadir una nuevo valor a las d
       self.vars[variable].append(value)
 ```
 
-
-**Paso 9 - Visualización y test del proceso de entrenamiento**
+**Paso 10 - Visualización y test del proceso de entrenamiento**
 
 Para poder comprobar como evoluciona nuestra red vamos a crear una función de test que nos permitirá analizar la evolución de nuestra red en cada iteración. Para ello crearemos una función denominada __generate_and_test_images__ de tipo tf.function (). Esta función recibirá 5 parámetros de entrada:
 
@@ -471,7 +470,7 @@ Finalmente generaremos una imagen con todos los ejemplos generados.
     plt.show()
 ```
 
-**Paso 10 - Definición de bucle de entrenamiento (Función)**
+**Paso 11 - Definición de bucle de entrenamiento (Función)**
 
 Una vez que se han definido todas las variables y funciones necesarias para el proceso de aprendizaje, podemos construir el bucle en tensorflow. Esta función estará formada por 5 paramétros:
 
@@ -525,7 +524,7 @@ Cada 15 iteraciones almacenamos el estado del modelo con el objetivo de recupera
 
 ```
 
-**Paso 11 - Ejecución del proceso de entrenamiento**
+**Paso 12 - Ejecución del proceso de entrenamiento**
 
 Una vez construidas todas las clases y funciones podemos ejecutar nuestro proceso de aprendizaje de la siguiente manera:
 
@@ -548,7 +547,7 @@ El proceso de ejecución monstrará en cada iteración el conjunto de imágenes 
 <img src="../img/secuencia_aprendizaje.png" alt="Secuencia de aprendizaje" width="800"/>
 
 
-**Paso 12 - Visualización de los resultados**
+**Paso 13 - Visualización de los resultados**
 
 Una vez finalizado el proceso de entrenamiento podremos visualizar el proceso mediante tensorboard utilizando el siguiente comando:
 
@@ -559,7 +558,7 @@ Una vez finalizado el proceso de entrenamiento podremos visualizar el proceso me
 <img src="../img/tensorboard_gans.png" alt="Resultado del proceso de aprendizaje de la red Gan" width="800"/>
 
 
-**Paso 13: Puesta en funcionamiento de la RGA**
+**Paso 14: Puesta en funcionamiento de la RGA**
 
 Por último vamos a crear una función para visualizar como realiza el proceso de generación nuestra RGA que denominaremos __plot_image__ y utilizará 5 parámetros:
 
