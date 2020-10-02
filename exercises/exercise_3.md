@@ -253,10 +253,10 @@ class Model:
     self.__discriminator_optimizer = optimizers.Adam(1e-4)
 
     self.__checkpoint_dir = './training_checkpoints'
-    self.__checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+    self.__checkpoint_prefix = os.path.join(self.__checkpoint_dir, "ckpt")
 
-    self.__checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
-                                 discriminator_optimizer=discriminator_optimizer,
+    self.__checkpoint = tf.train.Checkpoint(generator_optimizer=self.__generator_optimizer,
+                                 discriminator_optimizer=self.__discriminator_optimizer,
                                  generator=self.__generator,
                                  discriminator=self.__discriminator)
     
