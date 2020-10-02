@@ -59,10 +59,18 @@ Para poder cargar nuestro cuaderno desde github, tenemos que seleccionar la opci
 
 <img src="../img/collaborate_5.png" alt="Creando nuestro primer notebook" width="800"/>
 
-**Paso 5: Ccargando jupyter código desde nuestro ordenador**
+**Paso 5: Cargando jupyter código desde nuestro ordenador**
 
 También es posible cargar nuestros cuadernos desde nuestro propio ordenador. Para ello tendremos que seleccionar en el menú superior izquierdo __Subir cuaderno__ en el menú de __Archivo__. En al ventata que aparecerá a continuación tendremos que seleccionar la opción 5 y seleccionar el cuaderno en el sistema de ficheros de nuestro ordenador como se muestra en la siguiente imagen.
 
 <img src="../img/collaborate_6.png" alt="Creando nuestro primer notebook" width="800"/>
 
+**Paso 6: Cambiando el entorno de ejecución**
 
+Una de las grandes ventajas que nos ofrece Google colaborate es que podemo utilizar diferentes entornos de ejecución con diferentes tipos de hardware (CPU, GPU y TPU) de forma que podremos entrenar modelos complejos más rápido si utilizamos GPUS o TPUS. Para poder modificar el entorno de ejecución deberemos seleccionar en el menú superior la opción __Entorno de ejecución__ y en el menú que se despliegue la opción __Cambiar tipo de entorno de ejecución__ como se muestra en la siguiente imagen:
+
+<img src="../img/colaborate_7.png" alt="Modificación del entorno de ejecución" width="800"/>
+
+Una vez que hayamos pulsado la opción __Cambiar tipo de entorno de ejecución__ se nos desplegará una ventana que nos permitirá seleccionar el tipo de entorno que queremos configurar para el cuarderno. Pudiendose seleccionar entre tres opciones CPU, GPU y TPU como se muestra en la siguiente imagen:
+
+<img src="../img/colaborate_8.png" alt="Selección del tipo de entorno" width="800"/>
