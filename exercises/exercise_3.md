@@ -180,6 +180,7 @@ def build_generator_model(name, height, width, dims=1):
     model.add(LeakyReLU())
 
     model.add(Conv2DTranspose(1, (5, 5), strides=(2, 2), padding='same', use_bias=False, activation='tanh'))
+    assert model.output_shape == (None, 28, 28, 1)
 
     return model
 ```
@@ -669,7 +670,7 @@ Una vez construidas todas las clases y funciones podemos ejecutar nuestro proces
 ```
 log_dir = "./logs/eager/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-train_data, train_labels = generate_data_set(HEIGHT, WIDTH, 2048)
+train_data, train_labels = generate_data_set(HEIGHT, WIDTH, 127)
 train_dataset = tf.data.Dataset.from_tensor_slices(train_data).shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 
 model = train(train_dataset, 25, BATCH_SIZE, HEIGHT, WIDTH, log_dir)
