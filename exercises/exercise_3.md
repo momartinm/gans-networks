@@ -341,6 +341,9 @@ El noveno método o función se corresponde con la función dque generá los pun
   def create_checkpoint(self):
     self.__checkpoint.save(file_prefix = self.__checkpoint_prefix)
 ```
+
+A continuación se incluye el código completo de la clase Model en caso de que hayas tenido algún problema de identado durante los pasos anteriores. 
+
 ```
 class Model:
   
@@ -466,6 +469,9 @@ Aplicaremos el algoritmo de optimización sobre los nuevos valores calculados.
       model.discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, model.discriminator.trainable_variables))
 ```
 
+
+A continuación se incluye el código completo de la función __train_step__ en caso de que hayas tenido algún problema de identado durante los pasos anteriores. 
+
 ```
 @tf.function
 def train_step(model, writer, images, example_num, example_shape, epoch):
@@ -540,6 +546,9 @@ Finalmente generaremos una imagen con todos los ejemplos generados.
     plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
     plt.show()
 ```
+
+A continuación se incluye el código completo de la función __generate_and_test_images__ en caso de que hayas tenido algún problema de identado durante los pasos anteriores. 
+
 ```
 def generate_and_test_images(model, writer, epoch, num_examples, example_size):
 
@@ -616,6 +625,8 @@ Cada 15 iteraciones almacenamos el estado del modelo con el objetivo de recupera
   return model
 
 ```
+
+A continuación se incluye el código completo de la función __train__ en caso de que hayas tenido algún problema de identado durante los pasos anteriores. 
 
 ```
 def train(dataset, epochs, example_num, weight, height, log_dir):
